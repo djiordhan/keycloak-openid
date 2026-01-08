@@ -58,9 +58,11 @@ function authenticateScim(req, res, next) {
   // Validate token here - for now, just check if it exists
   const token = auth.substring(7);
   if (!token || token !== process.env.SCIM_TOKEN) {
+    console.warn('SCIM Auth Failure: Invalid token provided');
     return res.status(401).json(createErrorResponse(401, 'Invalid token'));
   }
   
+  console.log('SCIM Auth Success');
   next();
 }
 
@@ -71,6 +73,7 @@ router.use(authenticateScim);
 router.get('/Users', async (req, res) => {
   try {
     const { startIndex = 1, count = 100, filter } = req.query;
+    console.log(`SCIM List Users: startIndex=${startIndex}, count=${count}, filter="${filter || ''}"`);
     const skip = Math.max(0, parseInt(startIndex) - 1);
     const take = Math.min(parseInt(count), 100);
 
@@ -105,7 +108,7 @@ router.get('/Users', async (req, res) => {
     });
   } catch (error) {
     console.error('SCIM Users list error:', error);
-    res.status(500).json(createErrorResponse(500, 'Internal server error'));
+    res.status(500).json(createErrorResponse(500, `Internal server error: ${error.message}`));
   }
 });
 
@@ -113,6 +116,7 @@ router.get('/Users', async (req, res) => {
 router.get('/Users/:id', async (req, res) => {
   try {
     const userId = parseInt(req.params.id);
+    console.log(`SCIM Get User: ${req.params.id}`);
     
     if (isNaN(userId)) {
       return res.status(400).json(createErrorResponse(400, 'Invalid user ID'));
@@ -129,7 +133,7 @@ router.get('/Users/:id', async (req, res) => {
     res.json(toScimUser(user));
   } catch (error) {
     console.error('SCIM User get error:', error);
-    res.status(500).json(createErrorResponse(500, 'Internal server error'));
+    res.status(500).json(createErrorResponse(500, `Internal server error: ${error.message}`));
   }
 });
 
@@ -137,6 +141,7 @@ router.get('/Users/:id', async (req, res) => {
 router.post('/Users', async (req, res) => {
   try {
     const { userName, name, emails, active = true, externalId } = req.body;
+    console.log(`SCIM Create User request: userName=${userName}, externalId=${externalId}`);
 
     if (!userName) {
       return res.status(400).json(createErrorResponse(400, 'userName is required'));
@@ -163,10 +168,11 @@ router.post('/Users', async (req, res) => {
       data: userData
     });
 
+    console.log(`SCIM User Created: ID=${user.id}, userName=${user.userName}`);
     res.status(201).json(toScimUser(user));
   } catch (error) {
     console.error('SCIM User create error:', error);
-    res.status(500).json(createErrorResponse(500, 'Internal server error'));
+    res.status(500).json(createErrorResponse(500, `Internal server error: ${error.message}`));
   }
 });
 
@@ -174,6 +180,7 @@ router.post('/Users', async (req, res) => {
 router.put('/Users/:id', async (req, res) => {
   try {
     const userId = parseInt(req.params.id);
+    console.log(`SCIM Update User (PUT): ID=${req.params.id}`);
     
     if (isNaN(userId)) {
       return res.status(400).json(createErrorResponse(400, 'Invalid user ID'));
@@ -219,10 +226,11 @@ router.put('/Users/:id', async (req, res) => {
       data: userData
     });
 
+    console.log(`SCIM User Updated (PUT): ID=${user.id}, userName=${user.userName}`);
     res.json(toScimUser(user));
   } catch (error) {
     console.error('SCIM User update error:', error);
-    res.status(500).json(createErrorResponse(500, 'Internal server error'));
+    res.status(500).json(createErrorResponse(500, `Internal server error: ${error.message}`));
   }
 });
 
@@ -230,6 +238,7 @@ router.put('/Users/:id', async (req, res) => {
 router.patch('/Users/:id', async (req, res) => {
   try {
     const userId = parseInt(req.params.id);
+    console.log(`SCIM Patch User: ID=${req.params.id}`, JSON.stringify(req.body.Operations));
     
     if (isNaN(userId)) {
       return res.status(400).json(createErrorResponse(400, 'Invalid user ID'));
@@ -283,10 +292,11 @@ router.patch('/Users/:id', async (req, res) => {
       data: updateData
     });
 
+    console.log(`SCIM User Patched: ID=${user.id}`);
     res.json(toScimUser(user));
   } catch (error) {
     console.error('SCIM User patch error:', error);
-    res.status(500).json(createErrorResponse(500, 'Internal server error'));
+    res.status(500).json(createErrorResponse(500, `Internal server error: ${error.message}`));
   }
 });
 
@@ -294,6 +304,7 @@ router.patch('/Users/:id', async (req, res) => {
 router.delete('/Users/:id', async (req, res) => {
   try {
     const userId = parseInt(req.params.id);
+    console.log(`SCIM Delete User: ID=${req.params.id}`);
     
     if (isNaN(userId)) {
       return res.status(400).json(createErrorResponse(400, 'Invalid user ID'));
@@ -312,10 +323,11 @@ router.delete('/Users/:id', async (req, res) => {
       where: { id: userId }
     });
 
+    console.log(`SCIM User Deleted: ID=${userId}`);
     res.status(204).send();
   } catch (error) {
     console.error('SCIM User delete error:', error);
-    res.status(500).json(createErrorResponse(500, 'Internal server error'));
+    res.status(500).json(createErrorResponse(500, `Internal server error: ${error.message}`));
   }
 });
 

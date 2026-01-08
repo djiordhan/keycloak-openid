@@ -10,8 +10,8 @@ const prisma = new PrismaClient();
 
 const app = express();
 
-// Middleware for parsing JSON
-app.use(express.json());
+// Middleware for parsing JSON (including SCIM)
+app.use(express.json({ type: ['application/json', 'application/scim+json'] }));
 app.use(express.urlencoded({ extended: true }));
 
 // Set up EJS
