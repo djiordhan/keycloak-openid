@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keycloak Express OIDC</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f0f2f5; margin: 0; }
+        .card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; }
+        h1 { color: #1c1e21; }
+        .btn { display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; margin-top: 1rem; }
+        .btn:hover { background-color: #0056b3; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Welcome to the OIDC App</h1>
+        <% if (user) { %>
+            <p>Hello, <%= user.displayName || user.username %>!</p>
+            <a href="/profile" class="btn">View Profile</a>
+            <a href="/logout" class="btn" style="background-color: #dc3545;">Logout</a>
+        <% } else { %>
+            <p>Please log in to continue.</p>
+            <a href="/login" class="btn">Login with Keycloak</a>
+        <% } %>
+    </div>
+</body>
+</html>
